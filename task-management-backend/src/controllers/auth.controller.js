@@ -1,13 +1,6 @@
 const Auth = require("../models/auth.model");
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const path = require('path');
-const dotenv = require('dotenv');
-dotenv.config({ path: path.join(__dirname, 'config', 'config.env') });
-
-const generateToken = (userId, email) => {
-  return jwt.sign({ userId, email }, process.env.JWT_SECRET, { expiresIn: '4h' });
-};
+const { generateToken } = require("../utils/helper");
 
 const login = async (req, res) => {
   const { email, password } = req.body;

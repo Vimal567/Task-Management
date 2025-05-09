@@ -1,4 +1,5 @@
 const Task = require('../models/task.model');
+const XLSX = require('xlsx');
 
 const createTask = async (req, res) => {
   try {
@@ -106,4 +107,48 @@ const deleteTasks = async (req, res) => {
   }
 };
 
-module.exports = { createTask, getTasks, deleteTasks, updateTask };
+const exportTasks = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const tasks = await Task.find({ account_id: id });
+
+    if (tasks.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Create tasks at least one before exporting.'
+      });
+    }
+
+    // Convert the json array with keys as headers of the excel and values as rows data
+    const data = tasks.map((task, index) => ({
+      "S.No.": index + 1,
+      "TaskName": task.title,
+      "Description": task.description,
+      "Days": task.days,
+      "Due Date": task.due.toLocaleDateString('en-GB') // DD/MM/YYYY
+    }));
+
+    // Create a new workbook and add the data as a sheet
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Tasks');
+
+    // Generate the Excel file
+    const fileBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
+
+    // Set response headers to prompt download in the frontend
+    res.setHeader('Content-Disposition', 'attachment; filename=tasks.xlsx');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+    // Send the file
+    res.send(fileBuffer);
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to export tasks.',
+    });
+  }
+};
+
+module.exports = { createTask, getTasks, deleteTasks, updateTask, exportTasks };
