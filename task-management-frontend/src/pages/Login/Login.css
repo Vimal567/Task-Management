@@ -1,20 +1,20 @@
-.register-section {
+.login-section {
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.register-section .register-form {
+.login-section .login-form {
   padding: 1rem;
 }
 
-.register-form h1 {
+.login-form h1 {
   text-align: center;
   margin-bottom: 1rem;
 }
 
-.register-form .form-group {
+.login-form .form-group {
   display: flex;
   flex-direction: column;
   margin-bottom: 1rem;
@@ -35,7 +35,7 @@
   color: gray;
 }
 
-.register-form .action-container {
+.login-form .action-container {
   display: flex;
   justify-content: space-between;
   align-items: center;

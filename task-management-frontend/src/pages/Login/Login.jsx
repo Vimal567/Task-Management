@@ -1,24 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './Register.css';
+import './Login.css';
 import { useSnackbar } from 'notistack';
 import {
   ENDPOINT,
   REQUIRED_FIELDS,
-  PASSWORD_MISMATCH,
-  REGISTRATION_FAILED,
-  REGISTRATION_SUCCESS
+  LOGIN_FAILED,
+  LOGIN_SUCCESS
 } from '../../constants/constants';
 import axios from 'axios';
 
-const Register = () => {
+const Login = () => {
   const navigate = useNavigate();
 
   const [userEntry, setUserEntry] = useState({
-    name: '',
     email: '',
-    password: '',
-    confirmPassword: ''
+    password: ''
   });
   const { enqueueSnackbar } = useSnackbar();
 
@@ -33,23 +30,16 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { name, email, password } = userEntry;
+    const { email, password } = userEntry;
 
     // Check if all required fields are filled
-    if (!name || !email || !password) {
+    if (!email || !password) {
       enqueueSnackbar(REQUIRED_FIELDS, { variant: 'warning' });
       return;
     }
 
-    // Check if passwords match
-    if (password !== userEntry.confirmPassword) {
-      enqueueSnackbar(PASSWORD_MISMATCH, { variant: 'warning' })
-      return;
-    }
-
     try {
-      const response = await axios.post(ENDPOINT + 'auth/register', {
-        name,
+      const response = await axios.post(ENDPOINT + 'auth/login', {
         email,
         password
       });
@@ -64,12 +54,12 @@ const Register = () => {
         localStorage.setItem('token', token);
       }
 
-      // Clear the form and navigate to login
-      setUserEntry({ name: '', email: '', password: '', confirmPassword: '' });
-      enqueueSnackbar(REGISTRATION_SUCCESS, { variant: 'success' })
-      navigate('/login');
+      // Clear the form and navigate to task
+      setUserEntry({ email: '', password: '' });
+      enqueueSnackbar(LOGIN_SUCCESS, { variant: 'success' })
+      navigate('/task');
     } catch (error) {
-      const errorMessage = error.response?.data?.message || REGISTRATION_FAILED;
+      const errorMessage = error.response?.data?.message || LOGIN_FAILED;
       enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   };
@@ -80,27 +70,13 @@ const Register = () => {
       navigate('/task');
     }
   }, []);
+  
 
   return (
-    <div className="register-section page-container">
-      <div className="register-form card">
+    <div className="login-section page-container">
+      <div className="login-form card">
         <form onSubmit={handleSubmit}>
-          <h1>Register</h1>
-
-          <div className="form-group">
-            <label htmlFor="name">Name</label>
-            <input
-              className='form-control'
-              type="text"
-              name="name"
-              id="name"
-              value={userEntry.name}
-              onChange={handleChange}
-              placeholder='Enter your name'
-              required
-              minLength='3'
-            />
-          </div>
+          <h1>login</h1>
 
           <div className="form-group">
             <label htmlFor="email">Email</label>
@@ -132,24 +108,9 @@ const Register = () => {
             <span className="helper-text">Minimum 8 characters</span>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm password</label>
-            <input
-              className='form-control'
-              type="password"
-              name="confirmPassword"
-              id="confirmPassword"
-              value={userEntry.confirmPassword}
-              onChange={handleChange}
-              placeholder='Enter password again'
-              minLength='8'
-              required
-            />
-          </div>
-
           <div className="action-container">
-            <button type="submit" className='btn btn-primary'>Register</button>
-            <Link to="/login">Have an account?</Link>
+            <button type="submit" className='btn btn-primary'>Login</button>
+            <Link to="/register">Have an account?</Link>
           </div>
         </form>
       </div>
@@ -157,4 +118,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Login;
