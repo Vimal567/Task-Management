@@ -55,13 +55,12 @@ const LandingPage = () => {
       task_id: [id]
     };
     try {
-      const response = await axios.post(ENDPOINT + 'task/deleteTasks', payload, {
+      await axios.post(ENDPOINT + 'task/deleteTasks', payload, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      console.log(response);
       getTasks();
     } catch (error) {
       setIsLoading(false);
@@ -71,13 +70,48 @@ const LandingPage = () => {
     }
   };
 
+  const exportTasks = async () => {
+    setIsLoading(true);
+    try {
+      const accountId = localStorage.getItem('id');
+
+      const response = await axios.get(`${ENDPOINT}task/exportTasks/${accountId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        responseType: 'blob', //file is sent from BE
+      });
+
+      // Create a Blob URL
+      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob); // Create an object URL for the blob
+
+      // Create a temporary anchor element for downloading the file
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'tasks.xlsx'); // Specify the filename
+
+      // Programmatically click the link to trigger the download
+      link.click();
+
+      // Clean up by revoking the object URL after the download is initiated
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      setIsLoading(false);
+      enqueueSnackbar(TRY_AGAIN, { variant: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   // Handle file selection
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files); // Convert FileList to an array
     setSelectedFiles(files);
   };
 
-  // Handle file upload
+  // Handle file import
   const handleFileUpload = async () => {
     if (selectedFiles.length === 0) {
       alert('Please select files to upload');
@@ -132,7 +166,7 @@ const LandingPage = () => {
     <div className='landing-page-section page-container'>
       {isLoading ? <div className='loading-container'>Loading Please wait...</div> : <Fragment>
         <div className="tools-container">
-          <button type="button" className='btn btn-primary' onClick={openExportModal}>Export Tasks</button>
+          <button type="button" className='btn btn-primary' onClick={exportTasks}>Export Tasks</button>
           <button type="button" className='btn btn-primary' onClick={openImportModal}>Import Tasks</button>
           <button type="button" className='btn btn-primary'>Select All</button>
           <button type="button" className='btn btn-primary' onClick={openDeleteModal}>Delete Selected</button>
@@ -142,16 +176,6 @@ const LandingPage = () => {
             return <Task task={task} key={index} deleteTask={deleteTask} />
           })}
         </div>
-
-        {/* Export Modal */}
-        <Modal show={showExportModal} onClose={closeExportModal}>
-          <h4>Export Tasks</h4>
-          <p>This is a simple modal example with Bootstrap styles in a React app.</p>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={closeExportModal}>Cancel</button>
-            <button type="button" className="btn btn-success">Export</button>
-          </div>
-        </Modal>
 
         {/* Import Modal */}
         <Modal show={showImportModal} onClose={closeImportModal}>
@@ -183,6 +207,16 @@ const LandingPage = () => {
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={closeDeleteModal}>No</button>
             <button type="button" className="btn btn-danger">Yes</button>
+          </div>
+        </Modal>
+
+        {/* Task form Modal */}
+        <Modal show={showExportModal} onClose={closeExportModal}>
+          <h4>Export Tasks</h4>
+          <p>This is a simple modal example with Bootstrap styles in a React app.</p>
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={closeExportModal}>Cancel</button>
+            <button type="button" className="btn btn-success">Export</button>
           </div>
         </Modal>
       </Fragment>}
