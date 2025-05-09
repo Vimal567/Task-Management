@@ -1,4 +1,4 @@
-const AuthModel = require("../models/auth.model");
+const Auth = require("../models/auth.model");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
@@ -6,8 +6,6 @@ const dotenv = require('dotenv');
 dotenv.config({ path: path.join(__dirname, 'config', 'config.env') });
 
 const generateToken = (userId, email) => {
-  console.log('secret', process.env.JWT_SECRET)
-  console.log('ex', process.env.JWT_EXPIRATION)
   return jwt.sign({ userId, email }, process.env.JWT_SECRET, { expiresIn: '4h' });
 };
 
@@ -15,7 +13,7 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const userData = await AuthModel.findOne({ email });
+    const userData = await Auth.findOne({ email });
 
     if (!userData) {
       return res.status(404).json({
@@ -59,7 +57,7 @@ const register = async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
-    const existingData = await AuthModel.findOne({ email });
+    const existingData = await Auth.findOne({ email });
 
     if (existingData) {
       return res.status(400).json({
@@ -71,7 +69,7 @@ const register = async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const userDetails = await AuthModel.create({ name, email, password: hashedPassword });
+    const userDetails = await Auth.create({ name, email, password: hashedPassword });
 
     const responseData = {
       id: userDetails._id,
