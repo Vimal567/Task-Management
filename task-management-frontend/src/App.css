@@ -29,3 +29,9 @@ ul, li {
   margin-top: 6vh;
   min-height: 94vh;
 }
+
+button {
+  border: none;
+  outline: none;
+  background-color: inherit;
+}

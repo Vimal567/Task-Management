@@ -1,0 +1,37 @@
+.task-item {
+  width: 20rem;
+  padding: 0.5rem;
+  border: 1px solid gray;
+  border-radius: 10px;
+  margin: 0% 5% 2rem 0%;
+}
+
+.task-item .actions-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.actions-container button {
+  width: 2rem;
+  height: 2rem;
+}
+
+.actions-container img {
+  width: 2rem;
+  height: 2rem;
+}
+
+.task-item .task-details {
+  display: flex;
+  flex-direction: row;
+  font-size: large;
+  margin-top: 1rem;
+}
+
+.task-details .task-label {
+  font-weight: bold;
+}
+
+.task-details .task-value {
+  margin-left: 5px;
+}

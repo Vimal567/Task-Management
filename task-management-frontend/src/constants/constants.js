@@ -7,3 +7,4 @@ export const PASSWORD_STRENGTH = 'Password must be at least 6 characters long.';
 export const EMAIL_EXISTS = 'Email already exists, please use a different one.';
 export const REGISTRATION_SUCCESS = 'Registration successful. Redirecting...';
 export const LOGIN_SUCCESS = 'Login successful. Redirecting...';
+export const TRY_AGAIN = "Oops something went wrong, please try again.";
