@@ -5,7 +5,7 @@ const Task = ({ task, deleteTask }) => {
     <div className='task-item'>
       <div className="actions-container">
         <input type="checkbox" name="select" id="select" />
-        <button type="button" onClick={deleteTask(task.id)}>
+        <button type="button" onClick={() => deleteTask(task._id)}>
           <img src='/assets/delete-icon.svg' alt='delete task' />
         </button>
       </div>
