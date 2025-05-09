@@ -1,4 +1,4 @@
-export const ENDPOINT = 'http://localhost:8000/';
+export const ENDPOINT = 'http://localhost:8000/api/';
 export const REQUIRED_FIELDS = 'Fill all the required fields.';
 export const PASSWORD_MISMATCH = 'Passwords do not match.';
 export const REGISTRATION_FAILED = 'Registration failed. Please try again.';
