@@ -25,6 +25,10 @@ const taskSchema = new mongoose.Schema(
         message: 'Due date must be in the future.',
       },
     },
+    account_id: {
+      type: String,
+      required: true
+    }
   },
   {
     timestamps: true

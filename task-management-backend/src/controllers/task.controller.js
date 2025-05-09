@@ -2,13 +2,14 @@ const Task = require('../models/task.model');
 
 const createTask = async (req, res) => {
   try {
-    const { title, description, days, due } = req.body;
+    const { title, description, days, due, account_id } = req.body;
 
     const newTask = new Task({
       title,
       description,
       days,
       due,
+      account_id
     });
 
     const savedTask = await newTask.save();
@@ -28,8 +29,9 @@ const createTask = async (req, res) => {
 
 const getTasks = async (req, res) => {
   try {
-    const tasks = await Task.find();
-    
+    const { id } = req.params;
+    const tasks = await Task.find({ account_id: id });
+
     res.status(200).json({
       success: true,
       tasks,
