@@ -1,13 +1,15 @@
 import "./App.css";
-import { BrowserRouter, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Header from './components/Header/Header';
+import Register from "./pages/Register/Register";
 
 function App() {
   return (
     <BrowserRouter>
-        <Header />
-        <Routes>
-        </Routes>
+      <Header />
+      <Routes>
+        <Route path="/register" element={<Register />} />
+      </Routes>
     </BrowserRouter>
   );
 }

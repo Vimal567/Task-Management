@@ -14,13 +14,11 @@ const Header = () => {
       <ul className='menu'>
         {location.pathname === "/register" ?
           <li className='menu-item'>
-            <Link to="/">Login</Link>
+            <Link to="/login">Login</Link>
           </li>
           :
           <li className="menu-item">
-            <Link to="/cart">
-              Register
-            </Link>
+            <Link to="/register">Register</Link>
           </li>}
       </ul>
     </div>

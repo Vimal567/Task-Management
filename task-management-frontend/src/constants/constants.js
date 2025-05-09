@@ -1,0 +1,7 @@
+export const ENDPOINT = 'http://localhost:8000/';
+export const REQUIRED_FIELDS = 'Fill all the required fields.';
+export const PASSWORD_MISMATCH = 'Passwords do not match.';
+export const REGISTRATION_FAILED = 'Registration failed. Please try again.';
+export const PASSWORD_STRENGTH = 'Password must be at least 6 characters long.';
+export const EMAIL_EXISTS = 'Email already exists, please use a different one.';
+export const REGISTRATION_SUCCESS = 'Registration successful. Redirecting to login...';
