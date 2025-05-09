@@ -1,5 +1,6 @@
 const Task = require('../models/task.model');
 const XLSX = require('xlsx');
+const { processExcel, processCSV, formatDate } = require('../utils/helper');
 
 const createTask = async (req, res) => {
   try {
@@ -122,10 +123,10 @@ const exportTasks = async (req, res) => {
     // Convert the json array with keys as headers of the excel and values as rows data
     const data = tasks.map((task, index) => ({
       "S.No.": index + 1,
-      "TaskName": task.title,
+      "Task Name": task.title,
       "Description": task.description,
       "Days": task.days,
-      "Due Date": task.due.toLocaleDateString('en-GB') // DD/MM/YYYY
+      "Due Date": formatDate(task.due) // DD/MM/YYYY
     }));
 
     // Create a new workbook and add the data as a sheet
@@ -151,4 +152,62 @@ const exportTasks = async (req, res) => {
   }
 };
 
-module.exports = { createTask, getTasks, deleteTasks, updateTask, exportTasks };
+const importTasks = async (req, res) => {
+
+  try {
+    const { id } = req.params;
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded.',
+      });
+    }
+
+    const fileType = req.file.mimetype;
+
+    let tasksData = [];
+
+    if (fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      // Process Excel file
+      tasksData = await processExcel(req.file.buffer);
+    } else if (fileType === 'text/csv') {
+      // Process CSV file
+      tasksData = await processCSV(req.file.buffer);
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid file type. Please upload a valid Excel or CSV file.',
+      });
+    }
+
+    const parseDate = (dateStr) => {
+      const [day, month, year] = dateStr.split('-');
+      console.log(dateStr)
+      return new Date(`${year}-${month}-${day}T00:00:00.000Z`);
+    };
+
+    // Process the data
+    const tasksToSave = tasksData.map(task => ({
+      title: task['Task Name'],
+      description: task['Description'],
+      days: task['Days'],
+      due: parseDate(task['Due Date']),
+      account_id: id,
+    }));
+
+    // Insert tasks into the database
+    const createdTasks = await Task.insertMany(tasksToSave);
+
+    res.status(201).json({
+      success: true,
+      message: `${createdTasks.length} tasks imported successfully.`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while importing tasks. Please try again.',
+    });
+  }
+};
+
+module.exports = { createTask, getTasks, deleteTasks, updateTask, exportTasks, importTasks };
