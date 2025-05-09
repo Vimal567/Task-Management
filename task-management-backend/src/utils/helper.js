@@ -18,9 +18,23 @@ const formatDate = (date) => {
   return `${day}-${month}-${year}`;
 };
 
+const storage = multer.memoryStorage(); // Store files in memory for buffer processing
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage }).single('file');
+const fileFilter = (req, file, cb) => {
+  const allowedMimeTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'];
+
+  if (!allowedMimeTypes.includes(file.mimetype)) {
+    return cb(new Error('Invalid file type. Please upload a valid Excel or CSV file.'), false);
+  }
+  cb(null, true);
+};
+
+// Initialize Multer with file size limits and file filter
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 } // Set max file size to 10MB
+}).array('file');
 
 const processExcel = (buffer) => {
   const workbook = XLSX.read(buffer, { type: 'buffer' });

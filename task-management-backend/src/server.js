@@ -20,8 +20,8 @@ app.use(express.urlencoded({ extended: false }));
 // Default Route
 app.get('/', (req, res) => res.send("Api is working!"));
 
-app.use('/auth', auth);
-app.use('/task', task);
+app.use('/api/auth', auth);
+app.use('/api/task', task);
 
 app.listen(port, () => {
   console.log(`Server started at ${port}`);

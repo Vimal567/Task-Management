@@ -153,36 +153,33 @@ const exportTasks = async (req, res) => {
 };
 
 const importTasks = async (req, res) => {
-
   try {
     const { id } = req.params;
-    if (!req.file) {
+
+    if (!req.files || req.files.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'No file uploaded.',
+        message: 'No files uploaded.',
       });
     }
 
-    const fileType = req.file.mimetype;
-
     let tasksData = [];
 
-    if (fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-      // Process Excel file
-      tasksData = await processExcel(req.file.buffer);
-    } else if (fileType === 'text/csv') {
-      // Process CSV file
-      tasksData = await processCSV(req.file.buffer);
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid file type. Please upload a valid Excel or CSV file.',
-      });
+    // Loop through each file to process them
+    for (let file of req.files) {
+      const fileType = file.mimetype;
+
+      if (fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        // Process Excel file
+        tasksData = tasksData.concat(await processExcel(file.buffer));
+      } else if (fileType === 'text/csv') {
+        // Process CSV file
+        tasksData = tasksData.concat(await processCSV(file.buffer));
+      }
     }
 
     const parseDate = (dateStr) => {
       const [day, month, year] = dateStr.split('-');
-      console.log(dateStr)
       return new Date(`${year}-${month}-${day}T00:00:00.000Z`);
     };
 
@@ -203,11 +200,13 @@ const importTasks = async (req, res) => {
       message: `${createdTasks.length} tasks imported successfully.`,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while importing tasks. Please try again.',
     });
   }
 };
+
 
 module.exports = { createTask, getTasks, deleteTasks, updateTask, exportTasks, importTasks };
