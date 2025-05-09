@@ -7,7 +7,7 @@ const router = express.Router();
 router.route('/create').post(authMiddleware, createTask);
 router.route('/getTasks/:id').get(authMiddleware, getTasks);
 router.route('/updateTask/:id').patch(authMiddleware, updateTask);
-router.route('/deleteTasks').delete(authMiddleware, deleteTasks);
+router.route('/deleteTasks').post(authMiddleware, deleteTasks);
 router.route('/exportTasks/:id').get(authMiddleware, exportTasks);
 router.route('/importTasks/:id').post(authMiddleware, upload, importTasks);
 
