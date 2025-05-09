@@ -1,14 +1,23 @@
 .task-item {
   width: 20rem;
+  height: 20rem;
   padding: 0.5rem;
   border: 1px solid gray;
   border-radius: 10px;
-  margin: 0% 5% 2rem 0%;
+  margin: 1.2% 5% 0% 0%;
+  box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
 }
 
 .task-item .actions-container {
   display: flex;
   justify-content: space-between;
+}
+
+.actions-container input {
+  width: 1.1rem;
 }
 
 .actions-container button {

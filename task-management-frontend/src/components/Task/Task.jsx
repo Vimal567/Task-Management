@@ -1,10 +1,32 @@
 import './Task.css';
+import moment from 'moment';
 
-const Task = ({ task, deleteTask }) => {
+const Task = ({ task, deleteTask, selectedTasksList, setSelectedTasksList }) => {
+
+  const onFilterChange = (event) => {
+    const { checked, value } = event.target;
+    if (checked) {
+      setSelectedTasksList((prev) => [...prev, value]);
+    } else {
+      setSelectedTasksList((prev) => prev.filter((item) => item !== value));
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return moment(dateString).format('DD/MM/YYYY');
+  };
+
   return (
     <div className='task-item'>
       <div className="actions-container">
-        <input type="checkbox" name="select" id="select" />
+        <input
+          type="checkbox"
+          name="select"
+          id="select"
+          value={task._id}
+          checked={selectedTasksList.includes(task._id)}
+          onChange={(event) => onFilterChange(event)}
+        />
         <button type="button" onClick={() => deleteTask(task._id)}>
           <img src='/assets/delete-icon.svg' alt='delete task' />
         </button>
@@ -23,7 +45,7 @@ const Task = ({ task, deleteTask }) => {
       </div>
       <div className="task-details">
         <div className="task-label">Due date:</div>
-        <div className="task-value">{task.due}</div>
+        <div className="task-value">{formatDate(task.due)}</div>
       </div>
     </div>
   )

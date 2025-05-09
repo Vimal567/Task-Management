@@ -14,6 +14,7 @@ const LandingPage = () => {
 
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [selectedTasksList, setSelectedTasksList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [token, setToken] = useState(null);
 
@@ -49,11 +50,12 @@ const LandingPage = () => {
     }
   };
 
-  const deleteTask = async (id) => {
+  const deleteTask = async (selectedIds) => {
     setIsLoading(true);
     const payload = {
-      task_id: [id]
+      task_id: Array.isArray(selectedIds) ? selectedIds : [selectedIds]
     };
+
     try {
       await axios.post(ENDPOINT + 'task/deleteTasks', payload, {
         headers: {
@@ -61,6 +63,8 @@ const LandingPage = () => {
           'Content-Type': 'application/json'
         }
       });
+      setSelectedTasksList([]);
+      closeDeleteModal();
       getTasks();
     } catch (error) {
       setIsLoading(false);
@@ -148,6 +152,11 @@ const LandingPage = () => {
     }
   };
 
+  const handleSelectAll = () => {
+    const allTaskIds = tasks.map(task => task._id);
+    setSelectedTasksList(allTaskIds);
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -168,13 +177,21 @@ const LandingPage = () => {
         <div className="tools-container">
           <button type="button" className='btn btn-primary' onClick={exportTasks}>Export Tasks</button>
           <button type="button" className='btn btn-primary' onClick={openImportModal}>Import Tasks</button>
-          <button type="button" className='btn btn-primary'>Select All</button>
-          <button type="button" className='btn btn-primary' onClick={openDeleteModal}>Delete Selected</button>
+          <button type="button" className='btn btn-primary' onClick={handleSelectAll}>Select All</button>
+          {selectedTasksList.length > 0 && <button type="button" className='btn btn-primary' onClick={openDeleteModal}>Delete Selected</button>}
         </div>
         <div className="tasks-container">
           {tasks && tasks.map((task, index) => {
-            return <Task task={task} key={index} deleteTask={deleteTask} />
+            return <Task
+              task={task}
+              key={index}
+              deleteTask={deleteTask}
+              selectedTasksList={selectedTasksList}
+              setSelectedTasksList={setSelectedTasksList} />
           })}
+          <div className="add-task-container">
+            <img src='/assets/add-icon.svg' alt='add task' />
+          </div>
         </div>
 
         {/* Import Modal */}
@@ -206,7 +223,7 @@ const LandingPage = () => {
           <p>Are you sure you want to delete the selected tasks?</p>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={closeDeleteModal}>No</button>
-            <button type="button" className="btn btn-danger">Yes</button>
+            <button type="button" className="btn btn-danger" onClick={() => deleteTask(selectedTasksList)} >Yes</button>
           </div>
         </Modal>
 

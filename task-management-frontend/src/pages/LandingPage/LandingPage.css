@@ -19,6 +19,24 @@
   justify-content: flex-start;
 }
 
+.tasks-container .add-task-container {
+  width: 20rem;
+  height: 20rem;
+  border: 1px solid gray;
+  border-radius: 10px;
+  margin: 1.2% 5% 0% 0%;
+  box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.add-task-container img {
+  width: 15rem;
+  height: 15rem;
+}
+
 .tools-container button {
   margin-top: 1rem;
 }
