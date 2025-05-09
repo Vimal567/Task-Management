@@ -1,9 +1,14 @@
+import "./App.css";
+import { BrowserRouter, Routes } from 'react-router-dom';
+import Header from './components/Header/Header';
 
 function App() {
   return (
-    <>
-      Task management
-    </>
+    <BrowserRouter>
+        <Header />
+        <Routes>
+        </Routes>
+    </BrowserRouter>
   );
 }
 
