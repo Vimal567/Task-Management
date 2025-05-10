@@ -11,12 +11,13 @@ import {
 import axios from 'axios';
 
 const Login = () => {
-  const navigate = useNavigate();
 
   const [userEntry, setUserEntry] = useState({
     email: '',
     password: ''
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
   const handleChange = (e) => {
@@ -37,7 +38,7 @@ const Login = () => {
       enqueueSnackbar(REQUIRED_FIELDS, { variant: 'warning' });
       return;
     }
-
+    setIsLoading(true);
     try {
       const response = await axios.post(ENDPOINT + 'auth/login', {
         email,
@@ -56,10 +57,12 @@ const Login = () => {
 
       // Clear the form and navigate to task
       setUserEntry({ email: '', password: '' });
+      setIsLoading(false);
       enqueueSnackbar(LOGIN_SUCCESS, { variant: 'success' })
       navigate('/');
     } catch (error) {
-      const errorMessage = error.response?.data?.message || LOGIN_FAILED;
+      setIsLoading(false);
+      const errorMessage = LOGIN_FAILED;
       enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   };
@@ -70,7 +73,7 @@ const Login = () => {
       navigate('/');
     }
   }, []);
-  
+
 
   return (
     <div className="login-section page-container">
@@ -109,7 +112,12 @@ const Login = () => {
           </div>
 
           <div className="action-container">
-            <button type="submit" className='btn btn-primary'>Login</button>
+            {isLoading ?
+              <button className="btn btn-primary" type="submit" disabled>
+                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Login
+              </button> :
+              <button type="submit" className='btn btn-primary'>Login</button>}
             <Link to="/register">Have an account?</Link>
           </div>
         </form>

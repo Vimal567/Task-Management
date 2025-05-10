@@ -294,7 +294,7 @@ const LandingPage = () => {
             <button type="button" className='btn btn-success' onClick={() => openTaskModal(false)}>Add Task</button>
           </div>
           <div className="tasks-container">
-            {tasks && tasks.map((task, index) => {
+            {tasks && tasks.length > 0 ? tasks.map((task, index) => {
               return <Task
                 task={task}
                 key={index}
@@ -302,10 +302,12 @@ const LandingPage = () => {
                 deleteTask={deleteTask}
                 selectedTasksList={selectedTasksList}
                 setSelectedTasksList={setSelectedTasksList} />
-            })}
-            <div className="add-task-container" onClick={openTaskModal}>
-              <img src='/assets/add-icon.svg' alt='add task' />
-            </div>
+            })
+              : <div className='no-tasks-found'>
+                <span>
+                  No tasks found. Please add some tasks.
+                </span>
+              </div>}
           </div>
 
           {/* Import Modal */}

@@ -12,7 +12,6 @@ import {
 import axios from 'axios';
 
 const Register = () => {
-  const navigate = useNavigate();
 
   const [userEntry, setUserEntry] = useState({
     name: '',
@@ -20,6 +19,8 @@ const Register = () => {
     password: '',
     confirmPassword: ''
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
   const handleChange = (e) => {
@@ -46,7 +47,8 @@ const Register = () => {
       enqueueSnackbar(PASSWORD_MISMATCH, { variant: 'warning' })
       return;
     }
-
+    
+    setIsLoading(true);
     try {
       const response = await axios.post(ENDPOINT + 'auth/register', {
         name,
@@ -66,9 +68,11 @@ const Register = () => {
 
       // Clear the form and navigate to login
       setUserEntry({ name: '', email: '', password: '', confirmPassword: '' });
+      setIsLoading(false);
       enqueueSnackbar(REGISTRATION_SUCCESS, { variant: 'success' })
       navigate('/login');
     } catch (error) {
+      setIsLoading(false);
       const errorMessage = error.response?.data?.message || REGISTRATION_FAILED;
       enqueueSnackbar(errorMessage, { variant: 'error' });
     }
@@ -148,7 +152,12 @@ const Register = () => {
           </div>
 
           <div className="action-container">
-            <button type="submit" className='btn btn-primary'>Register</button>
+            {isLoading ?
+              <button className="btn btn-primary" type="submit" disabled>
+                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Register
+              </button> :
+              <button type="submit" className='btn btn-primary'>Register</button>}
             <Link to="/login">Have an account?</Link>
           </div>
         </form>
