@@ -1,5 +1,5 @@
 
-const Modal = ({ show, onClose, children }) => {
+const Modal = ({ heading, show, onClose, children }) => {
   if (!show) return null;
 
   return (
@@ -8,7 +8,7 @@ const Modal = ({ show, onClose, children }) => {
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">Modal Title</h5>
+              <h5 className="modal-title" id="exampleModalLabel">{ heading }</h5>
               <button type="button" className="btn-close" onClick={onClose}></button>
             </div>
             <div className="modal-body">

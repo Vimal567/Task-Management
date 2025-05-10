@@ -1,32 +1,64 @@
 import { Fragment, useEffect, useState } from 'react';
 import './LandingPage.css';
 import Modal from '../../components/Modal/Modal';
-import { TRY_AGAIN, ENDPOINT } from '../../constants/constants';
+import { TRY_AGAIN, ENDPOINT, REQUIRED_FIELDS } from '../../constants/constants';
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
 import Task from '../../components/Task/Task';
+import moment from 'moment';
 
 const LandingPage = () => {
-
-  const [showExportModal, setShowExportModal] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [selectedTasksList, setSelectedTasksList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [token, setToken] = useState(null);
+  const [taskEntry, setTaskEntry] = useState({
+    title: '',
+    description: '',
+    days: 0,
+    due: ''
+  });
+
+  // Modal hooks
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showTaskModal, setShowTaskModal] = useState(false);
 
   // Open/Close Modal Handlers
-  const openExportModal = () => setShowExportModal(true);
-  const closeExportModal = () => setShowExportModal(false);
-
   const openImportModal = () => setShowImportModal(true);
   const closeImportModal = () => setShowImportModal(false);
 
   const openDeleteModal = () => setShowDeleteModal(true);
   const closeDeleteModal = () => setShowDeleteModal(false);
+
+  const openTaskModal = (data) => {
+    if (data) {
+      const formattedDueDate = moment(data.due).isValid()
+        ? moment(data.due).format('YYYY-MM-DD')
+        : '';  // Set empty string if invalid date
+
+      setTaskEntry({
+        _id: data._id,
+        title: data.title,
+        description: data.description,
+        days: data.days,
+        due: formattedDueDate,
+      });
+    }
+    setShowTaskModal(true);
+  };
+
+  const closeTaskModal = () => {
+    setTaskEntry({
+      title: '',
+      description: '',
+      days: 0,
+      due: '',
+    });
+    setShowTaskModal(false);
+  };
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -157,6 +189,73 @@ const LandingPage = () => {
     setSelectedTasksList(allTaskIds);
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setTaskEntry(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
+  const handleTaskForm = async (e) => {
+    e.preventDefault();
+
+    if (!taskEntry.title || !taskEntry.due) {
+      enqueueSnackbar(REQUIRED_FIELDS, { variant: 'warning' });
+      return;
+    }
+
+    setIsLoading(true);
+
+    const accountId = localStorage.getItem('id');
+    const taskData = {
+      title: taskEntry.title,
+      description: taskEntry.description,
+      days: taskEntry.days,
+      due: moment(taskEntry.due).endOf('day').toISOString(),
+      account_id: accountId
+    };
+
+    try {
+      let response;
+
+      if (taskEntry._id) {
+        // If taskEntry has an _id, it's an update
+        await axios.patch(`${ENDPOINT}task/updateTask/${taskEntry._id}`, taskData, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        enqueueSnackbar("Task updated successfully!", { variant: 'success' });
+      } else {
+        // If no _id, create a new task
+        await axios.post(`${ENDPOINT}task/create`, taskData, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        enqueueSnackbar("Task added successfully!", { variant: 'success' });
+      }
+
+      setTaskEntry({
+        title: '',
+        description: '',
+        days: 0,
+        due: '',
+      });
+
+      closeTaskModal();
+      getTasks();
+    } catch (error) {
+      enqueueSnackbar("Error saving task", { variant: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -178,25 +277,26 @@ const LandingPage = () => {
           <button type="button" className='btn btn-primary' onClick={exportTasks}>Export Tasks</button>
           <button type="button" className='btn btn-primary' onClick={openImportModal}>Import Tasks</button>
           <button type="button" className='btn btn-primary' onClick={handleSelectAll}>Select All</button>
-          {selectedTasksList.length > 0 && <button type="button" className='btn btn-primary' onClick={openDeleteModal}>Delete Selected</button>}
+          {selectedTasksList.length > 0 && <button type="button" className='btn btn-danger' onClick={openDeleteModal}>Delete Selected</button>}
+          <button type="button" className='btn btn-success' onClick={() => openTaskModal(false)}>Add Task</button>
         </div>
         <div className="tasks-container">
           {tasks && tasks.map((task, index) => {
             return <Task
               task={task}
               key={index}
+              openTaskModal={openTaskModal}
               deleteTask={deleteTask}
               selectedTasksList={selectedTasksList}
               setSelectedTasksList={setSelectedTasksList} />
           })}
-          <div className="add-task-container">
+          <div className="add-task-container" onClick={openTaskModal}>
             <img src='/assets/add-icon.svg' alt='add task' />
           </div>
         </div>
 
         {/* Import Modal */}
-        <Modal show={showImportModal} onClose={closeImportModal}>
-          <h4>Import Tasks</h4>
+        <Modal heading={"Import tasks"} show={showImportModal} onClose={closeImportModal}>
           <p>Please select one or more CSV/Excel files to import:</p>
 
           <div className="mb-3">
@@ -218,8 +318,7 @@ const LandingPage = () => {
         </Modal>
 
         {/* Delete Modal */}
-        <Modal show={showDeleteModal} onClose={closeDeleteModal}>
-          <h4>Delete Tasks</h4>
+        <Modal heading={"Delete tasks"} show={showDeleteModal} onClose={closeDeleteModal}>
           <p>Are you sure you want to delete the selected tasks?</p>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={closeDeleteModal}>No</button>
@@ -228,12 +327,64 @@ const LandingPage = () => {
         </Modal>
 
         {/* Task form Modal */}
-        <Modal show={showExportModal} onClose={closeExportModal}>
-          <h4>Export Tasks</h4>
-          <p>This is a simple modal example with Bootstrap styles in a React app.</p>
+        <Modal heading={"Add/Update task"} show={showTaskModal} onClose={closeTaskModal}>
+          <form>
+            <div className="form-group">
+              <label htmlFor="title">Title*</label>
+              <input
+                className='form-control'
+                type="text"
+                name="title"
+                id="title"
+                value={taskEntry.title}
+                onChange={handleChange}
+                placeholder='Enter your email'
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="description">Description</label>
+              <input
+                className='form-control'
+                type="text-area"
+                name="description"
+                id="description"
+                value={taskEntry.description}
+                onChange={handleChange}
+                placeholder='Enter description'
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="days">Days</label>
+              <input
+                className='form-control'
+                type="number"
+                name="days"
+                id="days"
+                value={taskEntry.days}
+                onChange={handleChange}
+                placeholder='Enter days'
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="due">Due date*</label>
+              <input
+                className='form-control'
+                type="date"
+                name="due"
+                id="due"
+                value={taskEntry.due}
+                onChange={handleChange}
+                placeholder='Enter due date'
+              />
+            </div>
+          </form>
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={closeExportModal}>Cancel</button>
-            <button type="button" className="btn btn-success">Export</button>
+            <button type="button" className="btn btn-secondary" onClick={closeTaskModal}>Cancel</button>
+            <button type="submit" className="btn btn-success" onClick={handleTaskForm}>Save</button>
           </div>
         </Modal>
       </Fragment>}

@@ -1,7 +1,7 @@
 import './Task.css';
 import moment from 'moment';
 
-const Task = ({ task, deleteTask, selectedTasksList, setSelectedTasksList }) => {
+const Task = ({ task, openTaskModal, deleteTask, selectedTasksList, setSelectedTasksList }) => {
 
   const onFilterChange = (event) => {
     const { checked, value } = event.target;
@@ -27,9 +27,15 @@ const Task = ({ task, deleteTask, selectedTasksList, setSelectedTasksList }) => 
           checked={selectedTasksList.includes(task._id)}
           onChange={(event) => onFilterChange(event)}
         />
-        <button type="button" onClick={() => deleteTask(task._id)}>
-          <img src='/assets/delete-icon.svg' alt='delete task' />
-        </button>
+        <div>
+          <button type="button" onClick={() => openTaskModal(task)}>
+            <img src='/assets/edit-icon.svg' alt='edit task' />
+          </button>
+          <button type="button" onClick={() => deleteTask(task._id)}>
+            <img src='/assets/delete-icon.svg' alt='delete task' />
+          </button>
+        </div>
+
       </div>
       <div className="task-details">
         <div className="task-label">Title:</div>
@@ -41,7 +47,7 @@ const Task = ({ task, deleteTask, selectedTasksList, setSelectedTasksList }) => 
       </div>
       <div className="task-details">
         <div className="task-label">Days:</div>
-        <div className="task-value">{task.days}</div>
+        <div className="task-value">{task.days ? task.days : 0}</div>
       </div>
       <div className="task-details">
         <div className="task-label">Due date:</div>

@@ -77,7 +77,7 @@ const Register = () => {
   useEffect(() => {
     //if already loggedin
     if (localStorage.getItem('token')) {
-      navigate('/task');
+      navigate('/');
     }
   }, []);
 
@@ -88,7 +88,7 @@ const Register = () => {
           <h1>Register</h1>
 
           <div className="form-group">
-            <label htmlFor="name">Name</label>
+            <label htmlFor="name">Name*</label>
             <input
               className='form-control'
               type="text"
@@ -103,7 +103,7 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Email*</label>
             <input
               className='form-control'
               type="email"
@@ -117,7 +117,7 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Password*</label>
             <input
               className='form-control'
               type="password"
@@ -133,7 +133,7 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm password</label>
+            <label htmlFor="confirmPassword">Confirm password*</label>
             <input
               className='form-control'
               type="password"

@@ -40,3 +40,19 @@
 .tools-container button {
   margin-top: 1rem;
 }
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  font-size: 1.2rem;
+}
+
+.form-group input {
+  width: 18rem;
+  margin-top: 0.5rem;
+}

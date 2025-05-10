@@ -57,7 +57,7 @@ const Login = () => {
       // Clear the form and navigate to task
       setUserEntry({ email: '', password: '' });
       enqueueSnackbar(LOGIN_SUCCESS, { variant: 'success' })
-      navigate('/task');
+      navigate('/');
     } catch (error) {
       const errorMessage = error.response?.data?.message || LOGIN_FAILED;
       enqueueSnackbar(errorMessage, { variant: 'error' });
@@ -67,7 +67,7 @@ const Login = () => {
   useEffect(() => {
     //if already loggedin
     if (localStorage.getItem('token')) {
-      navigate('/task');
+      navigate('/');
     }
   }, []);
   
@@ -79,7 +79,7 @@ const Login = () => {
           <h1>login</h1>
 
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Email*</label>
             <input
               className='form-control'
               type="email"
@@ -93,7 +93,7 @@ const Login = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Password*</label>
             <input
               className='form-control'
               type="password"

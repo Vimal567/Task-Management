@@ -1,7 +1,7 @@
 .task-item {
   width: 20rem;
   height: 20rem;
-  padding: 0.5rem;
+  padding: 1rem;
   border: 1px solid gray;
   border-radius: 10px;
   margin: 1.2% 5% 0% 0%;
@@ -23,6 +23,10 @@
 .actions-container button {
   width: 2rem;
   height: 2rem;
+}
+
+.actions-container button:first-child {
+  margin-right: 1rem;
 }
 
 .actions-container img {
