@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useSnackbar } from 'notistack';
 import Task from '../../components/Task/Task';
 import moment from 'moment';
+import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
 
@@ -13,13 +14,15 @@ const LandingPage = () => {
   const [tasks, setTasks] = useState([]);
   const [selectedTasksList, setSelectedTasksList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState('');
   const [taskEntry, setTaskEntry] = useState({
     title: '',
     description: '',
     days: 0,
     due: ''
   });
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   // Modal hooks
   const [showImportModal, setShowImportModal] = useState(false);
@@ -59,8 +62,6 @@ const LandingPage = () => {
     });
     setShowTaskModal(false);
   };
-
-  const { enqueueSnackbar } = useSnackbar();
 
   const getTasks = async () => {
     setIsLoading(true);
@@ -185,8 +186,14 @@ const LandingPage = () => {
   };
 
   const handleSelectAll = () => {
-    const allTaskIds = tasks.map(task => task._id);
-    setSelectedTasksList(allTaskIds);
+    if (selectedTasksList.length === tasks.length) {
+      // If all tasks are selected, deselect them
+      setSelectedTasksList([]);
+    } else {
+      // Otherwise, select all tasks
+      const allTaskIds = tasks.map(task => task._id);
+      setSelectedTasksList(allTaskIds);
+    }
   };
 
   const handleChange = (e) => {
@@ -217,8 +224,6 @@ const LandingPage = () => {
     };
 
     try {
-      let response;
-
       if (taskEntry._id) {
         // If taskEntry has an _id, it's an update
         await axios.patch(`${ENDPOINT}task/updateTask/${taskEntry._id}`, taskData, {
@@ -260,6 +265,8 @@ const LandingPage = () => {
     const token = localStorage.getItem('token');
     if (token) {
       setToken(token);
+    } else {
+      navigate('/login')
     }
   }, []);
 
@@ -272,122 +279,128 @@ const LandingPage = () => {
 
   return (
     <div className='landing-page-section page-container'>
-      {isLoading ? <div className='loading-container'>Loading Please wait...</div> : <Fragment>
-        <div className="tools-container">
-          <button type="button" className='btn btn-primary' onClick={exportTasks}>Export Tasks</button>
-          <button type="button" className='btn btn-primary' onClick={openImportModal}>Import Tasks</button>
-          <button type="button" className='btn btn-primary' onClick={handleSelectAll}>Select All</button>
-          {selectedTasksList.length > 0 && <button type="button" className='btn btn-danger' onClick={openDeleteModal}>Delete Selected</button>}
-          <button type="button" className='btn btn-success' onClick={() => openTaskModal(false)}>Add Task</button>
-        </div>
-        <div className="tasks-container">
-          {tasks && tasks.map((task, index) => {
-            return <Task
-              task={task}
-              key={index}
-              openTaskModal={openTaskModal}
-              deleteTask={deleteTask}
-              selectedTasksList={selectedTasksList}
-              setSelectedTasksList={setSelectedTasksList} />
-          })}
-          <div className="add-task-container" onClick={openTaskModal}>
-            <img src='/assets/add-icon.svg' alt='add task' />
+      {isLoading ? <div className='loading-container'>
+        <div className="spinner-border text-info" role="status"></div>
+        <span>Loading...</span>
+      </div> :
+        <Fragment>
+          <div className="tools-container">
+            <button type="button" className='btn btn-primary' onClick={exportTasks}>Export Tasks</button>
+            <button type="button" className='btn btn-primary' onClick={openImportModal}>Import Tasks</button>
+            <button type="button" className='btn btn-primary' onClick={handleSelectAll}>
+              {selectedTasksList.length === tasks.length ? 'Deselect All' : 'Select All'}
+            </button>
+            {selectedTasksList.length > 0 && <button type="button" className='btn btn-danger' onClick={openDeleteModal}>Delete Selected</button>}
+            <button type="button" className='btn btn-success' onClick={() => openTaskModal(false)}>Add Task</button>
           </div>
-        </div>
-
-        {/* Import Modal */}
-        <Modal heading={"Import tasks"} show={showImportModal} onClose={closeImportModal}>
-          <p>Please select one or more CSV/Excel files to import:</p>
-
-          <div className="mb-3">
-            <label htmlFor="task-files" className="form-label">Choose Files</label>
-            <input
-              type="file"
-              id="task-files"
-              className="form-control"
-              multiple
-              accept=".csv, .xls, .xlsx"
-              onChange={handleFileChange}
-            />
+          <div className="tasks-container">
+            {tasks && tasks.map((task, index) => {
+              return <Task
+                task={task}
+                key={index}
+                openTaskModal={openTaskModal}
+                deleteTask={deleteTask}
+                selectedTasksList={selectedTasksList}
+                setSelectedTasksList={setSelectedTasksList} />
+            })}
+            <div className="add-task-container" onClick={openTaskModal}>
+              <img src='/assets/add-icon.svg' alt='add task' />
+            </div>
           </div>
 
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={closeImportModal}>Cancel</button>
-            <button type="button" className="btn btn-success" onClick={handleFileUpload}>Import</button>
-          </div>
-        </Modal>
+          {/* Import Modal */}
+          <Modal heading={"Import tasks"} show={showImportModal} onClose={closeImportModal}>
+            <p>Please select one or more CSV/Excel files to import:</p>
 
-        {/* Delete Modal */}
-        <Modal heading={"Delete tasks"} show={showDeleteModal} onClose={closeDeleteModal}>
-          <p>Are you sure you want to delete the selected tasks?</p>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={closeDeleteModal}>No</button>
-            <button type="button" className="btn btn-danger" onClick={() => deleteTask(selectedTasksList)} >Yes</button>
-          </div>
-        </Modal>
-
-        {/* Task form Modal */}
-        <Modal heading={"Add/Update task"} show={showTaskModal} onClose={closeTaskModal}>
-          <form>
-            <div className="form-group">
-              <label htmlFor="title">Title*</label>
+            <div className="mb-3">
+              <label htmlFor="task-files" className="form-label">Choose Files</label>
               <input
-                className='form-control'
-                type="text"
-                name="title"
-                id="title"
-                value={taskEntry.title}
-                onChange={handleChange}
-                placeholder='Enter your email'
-                required
+                type="file"
+                id="task-files"
+                className="form-control"
+                multiple
+                accept=".csv, .xls, .xlsx"
+                onChange={handleFileChange}
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <input
-                className='form-control'
-                type="text-area"
-                name="description"
-                id="description"
-                value={taskEntry.description}
-                onChange={handleChange}
-                placeholder='Enter description'
-              />
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={closeImportModal}>Cancel</button>
+              <button type="button" className="btn btn-success" onClick={handleFileUpload}>Import</button>
             </div>
+          </Modal>
 
-            <div className="form-group">
-              <label htmlFor="days">Days</label>
-              <input
-                className='form-control'
-                type="number"
-                name="days"
-                id="days"
-                value={taskEntry.days}
-                onChange={handleChange}
-                placeholder='Enter days'
-              />
+          {/* Delete Modal */}
+          <Modal heading={"Delete tasks"} show={showDeleteModal} onClose={closeDeleteModal}>
+            <p>Are you sure you want to delete the selected tasks?</p>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={closeDeleteModal}>No</button>
+              <button type="button" className="btn btn-danger" onClick={() => deleteTask(selectedTasksList)} >Yes</button>
             </div>
+          </Modal>
 
-            <div className="form-group">
-              <label htmlFor="due">Due date*</label>
-              <input
-                className='form-control'
-                type="date"
-                name="due"
-                id="due"
-                value={taskEntry.due}
-                onChange={handleChange}
-                placeholder='Enter due date'
-              />
+          {/* Task form Modal */}
+          <Modal heading={"Add/Update task"} show={showTaskModal} onClose={closeTaskModal}>
+            <form>
+              <div className="form-group">
+                <label htmlFor="title">Title*</label>
+                <input
+                  className='form-control'
+                  type="text"
+                  name="title"
+                  id="title"
+                  value={taskEntry.title}
+                  onChange={handleChange}
+                  placeholder='Enter your email'
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="description">Description</label>
+                <input
+                  className='form-control'
+                  type="text-area"
+                  name="description"
+                  id="description"
+                  value={taskEntry.description}
+                  onChange={handleChange}
+                  placeholder='Enter description'
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="days">Days</label>
+                <input
+                  className='form-control'
+                  type="number"
+                  name="days"
+                  id="days"
+                  value={taskEntry.days}
+                  onChange={handleChange}
+                  placeholder='Enter days'
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="due">Due date*</label>
+                <input
+                  className='form-control'
+                  type="date"
+                  name="due"
+                  id="due"
+                  value={taskEntry.due}
+                  onChange={handleChange}
+                  placeholder='Enter due date'
+                />
+              </div>
+            </form>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={closeTaskModal}>Cancel</button>
+              <button type="submit" className="btn btn-success" onClick={handleTaskForm}>Save</button>
             </div>
-          </form>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={closeTaskModal}>Cancel</button>
-            <button type="submit" className="btn btn-success" onClick={handleTaskForm}>Save</button>
-          </div>
-        </Modal>
-      </Fragment>}
+          </Modal>
+        </Fragment>}
     </div>
   )
 }
